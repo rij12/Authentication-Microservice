@@ -3,8 +3,6 @@ package controllers
 import (
 	"fmt"
 	"net/http"
-
-	"github.com/rij12/Authentication-Microservice/models"
 )
 
 type UserController struct{}
@@ -27,11 +25,5 @@ func (uc UserController) GetUserController(w http.ResponseWriter, r *http.Reques
 
 func (uc UserController) GetDbHealth(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("GetDbHealth Called.")
-
-	err := models.Database.PingDb()
-
-	if err != nil {
-		http.Error(w, "Can not connect to MongoDB", http.StatusInternalServerError)
-	}
 
 }

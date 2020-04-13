@@ -7,13 +7,16 @@ import (
 	"time"
 
 	"github.com/rij12/Authentication-Microservice/models"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 type DatabaseService struct {
-	// db *database
+	connectionString string
+	client           *mongo.Client
+	ctx              *context.Context
 }
 
 func (dbs DatabaseService) createUser(user models.User) {
@@ -36,9 +39,10 @@ func (dbs DatabaseService) getUserByID(id string) {
 
 }
 
-func (dbs DatabaseService) ConnectDB(username string, password string, url string, port int) {
+func (dbs DatabaseService) ConnectDB(username string, password string, url string, port int) *mongo.Client {
 
 	connectionString := fmt.Sprintf("mongodb://%s:%s@%s:%d/?authSource=admin", username, password, url, port)
+	dbs.connectionString = connectionString
 
 	client, err := mongo.NewClient(options.Client().ApplyURI(connectionString))
 
@@ -47,7 +51,7 @@ func (dbs DatabaseService) ConnectDB(username string, password string, url strin
 	}
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-
+	dbs.ctx = &ctx
 	err = client.Connect(ctx)
 
 	if err != nil {
@@ -60,8 +64,34 @@ func (dbs DatabaseService) ConnectDB(username string, password string, url strin
 		log.Fatal(err)
 	}
 
+	dbs.client = client
+	return client
+
 }
 
-func (dbs DatabaseService) pingDb(){
-	err	= dbs.ConnectDB("username", ,"password", "url", "port")
+func (dbs DatabaseService) PingDb() error {
+
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	err := dbs.client.Connect(ctx)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = dbs.client.Ping(ctx, readpref.Primary())
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return err
+
+}
+
+func (dbs DatabaseService) ListDatabases() {
+
+	databases, _ := dbs.client.ListDatabaseNames(*dbs.ctx, bson.M{})
+
+	fmt.Println(databases)
+
 }
