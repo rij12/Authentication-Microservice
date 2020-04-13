@@ -21,6 +21,7 @@ func main() {
 	router.HandleFunc("/api/register", controller.RegisterController).Methods("POST")
 	router.HandleFunc("/api/protected", controller.ProtectedEndpointTest).Methods("GET")
 	router.HandleFunc("/api/user/", controller.GetUserController).Methods("GET")
+	router.HandleFunc("/api/db_health", controller.getDbHealth).Methods("GET")
 	router.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]bool{"ok": true})
 	}).Methods("GET")
