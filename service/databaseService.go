@@ -13,45 +13,48 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
+var databasesHandle *mongo.Client
+
 type DatabaseService struct {
 	connectionString string
 	client           *mongo.Client
-	ctx              *context.Context
 }
 
-func (dbs DatabaseService) createUser(user models.User) {
-
+func (dbs *DatabaseService) newDatabaseService() *DatabaseService {
+	return &DatabaseService{}
 }
 
-func (dbs DatabaseService) updateUser(user models.User) {
-
-}
-
-func (dbs DatabaseService) deleteUser(user models.User) {
+func (dbs *DatabaseService) createUser(user models.User) {
 
 }
 
-func (dbs DatabaseService) getUserByEmail(email string) {
+func (dbs *DatabaseService) updateUser(user models.User) {
 
 }
 
-func (dbs DatabaseService) getUserByID(id string) {
+func (dbs *DatabaseService) deleteUser(user models.User) {
 
 }
 
-func (dbs DatabaseService) ConnectDB(username string, password string, url string, port int) *mongo.Client {
+func (dbs *DatabaseService) getUserByEmail(email string) {
 
-	connectionString := fmt.Sprintf("mongodb://%s:%s@%s:%d/?authSource=admin", username, password, url, port)
-	dbs.connectionString = connectionString
+}
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(connectionString))
+func (dbs *DatabaseService) getUserByID(id string) {
+
+}
+
+func (dbs *DatabaseService) ConnectDB(username string, password string, url string, port int) *mongo.Client {
+
+	dbs.connectionString = fmt.Sprintf("mongodb://%s:%s@%s:%d/?authSource=admin", username, password, url, port)
+
+	client, err := mongo.NewClient(options.Client().ApplyURI(dbs.connectionString))
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	dbs.ctx = &ctx
 	err = client.Connect(ctx)
 
 	if err != nil {
@@ -65,11 +68,12 @@ func (dbs DatabaseService) ConnectDB(username string, password string, url strin
 	}
 
 	dbs.client = client
+	databasesHandle = client
 	return client
 
 }
 
-func (dbs DatabaseService) PingDb() error {
+func (dbs *DatabaseService) PingDb() error {
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	err := dbs.client.Connect(ctx)
@@ -85,12 +89,17 @@ func (dbs DatabaseService) PingDb() error {
 	}
 
 	return err
-
 }
 
-func (dbs DatabaseService) ListDatabases() {
+func (dbs *DatabaseService) ListDatabases() {
 
-	databases, _ := dbs.client.ListDatabaseNames(*dbs.ctx, bson.M{})
+	if dbs.client == nil {
+		log.Fatal("Database Client is null")
+		return
+	}
+
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	databases, _ := dbs.client.ListDatabaseNames(ctx, bson.M{})
 
 	fmt.Println(databases)
 

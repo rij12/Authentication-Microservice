@@ -16,10 +16,10 @@ func main() {
 
 	router := mux.NewRouter()
 
-	var controller controllers.UserController
-	var databaseService service.DatabaseService
-	databaseService.ConnectDB("mongoadmin", "secret", "localhost", 27017)
+	databaseService := service.DatabaseService{}
+	client := databaseService.ConnectDB("mongoadmin", "secret", "localhost", 27017)
 	databaseService.ListDatabases()
+	controller := controllers.UserController{client}
 
 	router.HandleFunc("/api/login", controller.LoginController).Methods("POST")
 	router.HandleFunc("/api/register", controller.RegisterController).Methods("POST")
