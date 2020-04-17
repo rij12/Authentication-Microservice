@@ -1,1 +1,11 @@
 language: go
+
+addons:
+  sonarcloud:
+    organization: "rij12-github"
+    token:
+      secure: b58goXgCsezqckV9k/uz3br3tW3P25M/cWknMZLnMyh4vmTH4EMoLDQ/Y4YimiKeNbIZrOKn6oICBKBdrTp3X21ElkCs2ENSrpvK7rxWAgRbjhFbC2q4XrJfW4sZuG1JLZf2TYrxLpW7gO04tuVinZ7bltgTtKa/N6EHCzQr0lgV6RqslswhCDMFgapaks9kUy8C9/PbWRtI6fHx/R0Irn8c8EaR2T7kIJf8HrYVZq4k+vuIZhTRBNSqkgMbCLlPllpStfrOTdkzW2Mt523oj7cwLEDLvQrBZs6reLg4n4bkFjr0EDYRqgWWH90ph9NhGe/AisyJ8oqAtWBaRe+/ulTez4Dz5/yURun9rDZNoiWJxBIU8vegfkSPY3vToEmASZeQrdywO1vr2XVZrpcH17mvUcCgOZVkaEng7WThepikVSggJBpgOGTfoXQyKqB91Rou9KUQnPJyaqVapLRIDQbCk1MR8BI0Kn4vOJK1fQ54PcqavEckbSaJGh0Im9H1/cCgpNFk6BBqrByB11MH0+B6Jqy0x406bqWHoCFcBavikh21QmZVDXfkYX7IR79rjlbmmThxASHDxGcT5HGXdiFvA6b16RfPImBvohGEMjkATGXJCdBXTzSv0FWlyM7R3bD2hPfaqmoXkWUb6kHPItSpU5cZZgjoNbMc7hPlDeA=
+
+script:
+  # the following command line builds the project, runs the tests with coverage and then execute the SonarCloud analysis
+  - sonar-scanner
