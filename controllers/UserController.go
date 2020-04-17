@@ -18,34 +18,53 @@ type UserController struct {
 	UserService    *service.UserService
 }
 
+// Login godoc
+// @Summary Login
+// @Description login by email and password
+// @ID login
+// @Accept  json
+// @Produce  json
+// @Param id path int true "Account ID"
+// @Success 200 {object} model.Account
+// @Header 200 {string} Token "qwerty"
+// @Failure 400 {object} httputil.HTTPError
+// @Failure 404 {object} httputil.HTTPError
+// @Failure 500 {object} httputil.HTTPError
+// @Router /accounts/{id} [get]
 func (uc *UserController) LoginController(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Login Controller")
 }
 
 func (uc *UserController) RegisterController(w http.ResponseWriter, r *http.Request) {
+
+	// Parse body into a User
 	decoder := json.NewDecoder(r.Body)
 	var user models.User
 	err := decoder.Decode(&user)
 	user.UserID = uuid.New().String()
-	if err != nil {
-		log.Fatal(err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	// Hash the password
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
-
-	if err != nil {
-		log.Fatal(err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
 	user.Password = string(hash)
 
+	if err != nil {
+		log.Fatal(err)
+		w.WriteHeader(http.StatusBadRequest)
+	}
+
+	if err != nil {
+		log.Fatal(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 	// User Service
-	result := service.UserService.RegisterUser(user)
+	userService := service.UserService{}
+	_, err = userService.RegisterUser(user)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	w.WriteHeader(http.StatusCreated)
 
 }
 
@@ -62,20 +81,21 @@ func (uc *UserController) GetUserByEmailController(w http.ResponseWriter, r *htt
 	email, err := r.URL.Query()["email"]
 
 	if !err || len(email[0]) < 1 {
-		log.Warning("Url Param 'email' is missing")
+		//log.("Url Param 'email' is missing")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	user, err := service.UserService.GetUserByEmail(email)
+	userService := service.UserService{}
+	user, _ := userService.GetUserByEmail(email[0])
 	json.NewEncoder(w).Encode(user)
 }
 
 func (uc *UserController) GetDbHealth(w http.ResponseWriter, r *http.Request) {
-	return w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusOK)
 }
 
-func handleError(err error) http.Response {
-
-	// TODO!
-}
+//func handleError(err error) http.Response {
+//
+//	// TODO!
+//}

@@ -18,6 +18,14 @@
   revision = "ff6b7dc882cf4cfba7ee0b9f7dcc1ac096c554aa"
 
 [[projects]]
+  digest = "1:582b704bebaa06b48c29b0cec224a6058a09c86883aaddabde889cd1a5f73e1b"
+  name = "github.com/google/uuid"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "0cd6bf5da1e1c83f8b45653022c74f71af0538a4"
+  version = "v1.1.1"
+
+[[projects]]
   digest = "1:25ebe6496abb289ef977c081b2d49f56dd97c32db4ca083d37f95923909ced02"
   name = "github.com/gorilla/mux"
   packages = ["."]
@@ -80,9 +88,13 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:f92f6956e4059f6a3efc14924d2dd58ba90da25cc57fe07ae3779ef2f5e0c5f2"
+  digest = "1:d71baed52a5a67407a72b63949aa042ea68bb32fdab03e07704a4f1dc309d193"
   name = "golang.org/x/crypto"
-  packages = ["pbkdf2"]
+  packages = [
+    "bcrypt",
+    "blowfish",
+    "pbkdf2",
+  ]
   pruneopts = "UT"
   revision = "056763e48d71961566155f089ac0f02f1dda9b5a"
 
@@ -113,8 +125,13 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/google/uuid",
     "github.com/gorilla/mux",
+    "go.mongodb.org/mongo-driver/bson",
     "go.mongodb.org/mongo-driver/mongo",
+    "go.mongodb.org/mongo-driver/mongo/options",
+    "go.mongodb.org/mongo-driver/mongo/readpref",
+    "golang.org/x/crypto/bcrypt",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

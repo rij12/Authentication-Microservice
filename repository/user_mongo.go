@@ -1,4 +1,4 @@
-package userRepository
+package repository
 
 import (
 	"context"
@@ -11,7 +11,10 @@ type UserRepository struct{}
 
 func (u UserRepository) SaveUser(user models.User) (models.User, error) {
 
-	_, err := db.Database("user").Collection("users").InsertOne(context.Background(), user)
+	database := Database{}
+	repo := database.getDb()
+
+	_, err := repo.Database("user").Collection("users").InsertOne(context.Background(), user)
 
 	if err != nil {
 		return models.User{}, err
@@ -20,10 +23,13 @@ func (u UserRepository) SaveUser(user models.User) (models.User, error) {
 	return user, nil
 }
 
-func (u UserRepository) GetUserByEmail(user models.User) (models.User, error) {
+func (u UserRepository) GetUserByEmail(email string) (models.User, error) {
+
+	database := Database{}
+	repo := database.getDb()
 
 	var userResult models.User
-	err := uc.DatabaseClient.Database("user").Collection("users").FindOne(context.Background(), bson.M{"email": email[0]}).Decode(&user)
+	err := repo.Database("user").Collection("users").FindOne(context.Background(), bson.M{"email": email}).Decode(&userResult)
 
 	if err != nil {
 		return models.User{}, err

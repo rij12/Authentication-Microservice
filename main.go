@@ -9,13 +9,15 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/rij12/Authentication-Microservice/controllers"
+	"github.com/rij12/Authentication-Microservice/repository"
 )
 
 func main() {
 
 	router := mux.NewRouter()
 	// Set a Gobal Var inside Repo Package
-	databaseService.ConnectDB("mongoadmin", "secret", "localhost", 27017)
+	db := repository.Database{}
+	db.ConnectDB("mongoadmin", "secret", "localhost", 27017)
 
 	controller := controllers.UserController{}
 

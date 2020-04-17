@@ -1,4 +1,4 @@
-package service
+package repository
 
 import (
 	"context"
@@ -14,15 +14,15 @@ import (
 
 var db *mongo.Client
 
-type DatabaseService struct {
+type Database struct {
 	connectionString string
 }
 
-func (dbs *DatabaseService) init() *DatabaseService {
-	return &DatabaseService{}
+func (dbs *Database) init() *Database {
+	return &Database{}
 }
 
-func (dbs *DatabaseService) ConnectDB(username string, password string, url string, port int) *mongo.Client {
+func (dbs *Database) ConnectDB(username string, password string, url string, port int) *mongo.Client {
 
 	dbs.connectionString = fmt.Sprintf("mongodb://%s:%s@%s:%d/?authSource=admin", username, password, url, port)
 
@@ -51,7 +51,7 @@ func (dbs *DatabaseService) ConnectDB(username string, password string, url stri
 
 }
 
-func (dbs *DatabaseService) PingDb() error {
+func (dbs *Database) PingDb() error {
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	err := db.Connect(ctx)
@@ -69,11 +69,11 @@ func (dbs *DatabaseService) PingDb() error {
 	return err
 }
 
-func (dbs *DatabaseService) ListDatabases() []string {
+func (dbs *Database) ListDatabases() []string {
 
 	if db == nil {
 		log.Fatal("Database Client is null")
-		return
+		return []string{}
 	}
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
@@ -85,6 +85,6 @@ func (dbs *DatabaseService) ListDatabases() []string {
 
 }
 
-func (dbs *DatabaseService) getDb() *mongo.Client {
+func (dbs *Database) getDb() *mongo.Client {
 	return db
 }
