@@ -9,22 +9,20 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/rij12/Authentication-Microservice/controllers"
-	"github.com/rij12/Authentication-Microservice/service"
 )
 
 func main() {
 
 	router := mux.NewRouter()
+	// Set a Gobal Var inside Repo Package
+	databaseService.ConnectDB("mongoadmin", "secret", "localhost", 27017)
 
-	databaseService := service.DatabaseService{}
-	client := databaseService.ConnectDB("mongoadmin", "secret", "localhost", 27017)
-	databaseService.ListDatabases()
-	controller := controllers.UserController{client}
+	controller := controllers.UserController{}
 
 	router.HandleFunc("/api/login", controller.LoginController).Methods("POST")
 	router.HandleFunc("/api/register", controller.RegisterController).Methods("POST")
 	router.HandleFunc("/api/protected", controller.ProtectedEndpointTest).Methods("GET")
-	router.HandleFunc("/api/user/", controller.GetUserController).Methods("GET")
+	router.HandleFunc("/api/user", controller.GetUserByEmailController).Methods("GET")
 	router.HandleFunc("/api/db_health", controller.GetDbHealth).Methods("GET")
 	router.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]bool{"ok": true})

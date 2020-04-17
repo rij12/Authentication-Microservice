@@ -1,9 +1,9 @@
 package service
 
 import (
-	"errors"
+	"github.com/rij12/Authentication-Microservice/models"
+	"github.com/rij12/Authentication-Microservice/repository"
 
-	"github.com/rij12/models/models"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -11,12 +11,20 @@ type UserService struct {
 	DatabaseService *mongo.Client
 }
 
-func (userService UserService) SaveUser(user models.User) (models.User, error) {
+func (userService UserService) RegisterUser(user models.User) (models.User, error) {
 
-	if user == nil {
-		return nil, errors.New("User was nil")
-	}
+	userRepo := new(repository.UserRepository)
+	userRepo.Register(user)
+	return user, nil
+}
 
-	userService.DatabaseService.Database("user").Collection("user").InsertOne()
+func (userService UserService) GetUserByEmail(email string) (models.User, models.Error) {
+
+	userRepo := new(repository.UserRepository)
+	userRepo.FindUserByEmail(user)
+	return user, nil
+}
+
+func (userService UserService) Login(email string, hashedPassword string) (models.JWT, error) {
 
 }

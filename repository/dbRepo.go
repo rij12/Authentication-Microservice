@@ -6,42 +6,20 @@ import (
 	"log"
 	"time"
 
-	"github.com/rij12/Authentication-Microservice/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-var databasesHandle *mongo.Client
+var db *mongo.Client
 
 type DatabaseService struct {
 	connectionString string
-	client           *mongo.Client
 }
 
-func (dbs *DatabaseService) newDatabaseService() *DatabaseService {
+func (dbs *DatabaseService) init() *DatabaseService {
 	return &DatabaseService{}
-}
-
-func (dbs *DatabaseService) createUser(user models.User) {
-
-}
-
-func (dbs *DatabaseService) updateUser(user models.User) {
-
-}
-
-func (dbs *DatabaseService) deleteUser(user models.User) {
-
-}
-
-func (dbs *DatabaseService) getUserByEmail(email string) {
-
-}
-
-func (dbs *DatabaseService) getUserByID(id string) {
-
 }
 
 func (dbs *DatabaseService) ConnectDB(username string, password string, url string, port int) *mongo.Client {
@@ -67,8 +45,8 @@ func (dbs *DatabaseService) ConnectDB(username string, password string, url stri
 		log.Fatal(err)
 	}
 
-	dbs.client = client
-	databasesHandle = client
+	db = client
+
 	return client
 
 }
@@ -76,13 +54,13 @@ func (dbs *DatabaseService) ConnectDB(username string, password string, url stri
 func (dbs *DatabaseService) PingDb() error {
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err := dbs.client.Connect(ctx)
+	err := db.Connect(ctx)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = dbs.client.Ping(ctx, readpref.Primary())
+	err = db.Ping(ctx, readpref.Primary())
 
 	if err != nil {
 		log.Fatal(err)
@@ -91,16 +69,22 @@ func (dbs *DatabaseService) PingDb() error {
 	return err
 }
 
-func (dbs *DatabaseService) ListDatabases() {
+func (dbs *DatabaseService) ListDatabases() []string {
 
-	if dbs.client == nil {
+	if db == nil {
 		log.Fatal("Database Client is null")
 		return
 	}
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	databases, _ := dbs.client.ListDatabaseNames(ctx, bson.M{})
+	databases, _ := db.ListDatabaseNames(ctx, bson.M{})
 
 	fmt.Println(databases)
 
+	return databases
+
+}
+
+func (dbs *DatabaseService) getDb() *mongo.Client {
+	return db
 }
