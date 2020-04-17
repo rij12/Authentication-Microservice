@@ -1,9 +1,14 @@
 package models
 
 type User struct {
-	UserID   string `bson:"userid"   json:"userid"`
+	UserID   string `bson:"userId"   json:"userId"`
 	Email    string `bson:"email"    json:"email"`
 	Password string `bson:"password" json:"password"`
+}
+
+type UserResult struct {
+	UserID string `bson:"userId"   json:"userId"`
+	Email  string `bson:"email"    json:"email"`
 }
 
 type JWT struct {
@@ -11,6 +16,6 @@ type JWT struct {
 }
 
 type Error struct {
-	Message    string
-	StatusCode int
+	Message    string `json:"message"`
+	StatusCode int    `json:"statusCode"`
 }
