@@ -4,8 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/rij12/Authentication-Microservice/utils"
 	"log"
 	"net/http"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -17,20 +20,19 @@ func main() {
 
 	// Set a Gobal Var inside Repo Package
 	db := repository.Database{}
-	connection := db.ConnectDB("mongoadmin", "secret", "localhost", 27017)
+	username := os.Getenv("MONGO_USERNAME")
+	password := os.Getenv("MONGO_PASSWORD")
+	mongoUrl := os.Getenv("MONGO_HOST")
+	mongoPort := os.Getenv("MONGO_PORT")
+	port, _ := strconv.Atoi(mongoPort)
+	connection := db.ConnectDB(username, password, mongoUrl, port)
 	defer connection.Disconnect(context.Background())
 
 	// Routing
 	router := mux.NewRouter()
 	controller := controllers.UserController{}
 
-	router.HandleFunc("/api/login", controller.LoginController).Methods("POST")
-	router.HandleFunc("/api/register", controller.RegisterController).Methods("POST")
-	router.HandleFunc("/api/protected", controller.ProtectedEndpointTest).Methods("GET")
-	router.HandleFunc("/api/user", controller.GetUserByEmailController).Methods("GET")
-	router.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
-		json.NewEncoder(w).Encode(map[string]bool{"ok": true})
-	}).Methods("GET")
+	registerHandlers(router, &controller)
 
 	srv := &http.Server{
 		Handler: router,
@@ -44,4 +46,14 @@ func main() {
 
 	log.Fatal(srv.ListenAndServe())
 
+}
+
+func registerHandlers(router *mux.Router, controller *controllers.UserController) {
+	router.HandleFunc("/api/login", controller.LoginController).Methods("POST")
+	router.HandleFunc("/api/register", controller.RegisterController).Methods("POST")
+	router.HandleFunc("/api/protected", utils.TokenVerifyMiddleWare(controller.ProtectedEndpointTest)).Methods("GET")
+	router.HandleFunc("/api/user", controller.GetUserByEmailController).Methods("GET")
+	router.HandleFunc("/api/health", func(w http.ResponseWriter, r *http.Request) {
+		json.NewEncoder(w).Encode(map[string]bool{"ok": true})
+	}).Methods("GET")
 }

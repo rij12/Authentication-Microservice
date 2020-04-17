@@ -21,19 +21,12 @@ type UserController struct {
 	UserService    *service.UserService
 }
 
-// Login godoc
-// @Summary Login
-// @Description login by email and password
-// @ID login
-// @Accept  json
-// @Produce  json
-// @Param id path int true "Account ID"
-// @Success 200 {object} model.Account
-// @Header 200 {string} Token "qwerty"
-// @Failure 400 {object} httputil.HTTPError
-// @Failure 404 {object} httputil.HTTPError
-// @Failure 500 {object} httputil.HTTPError
-// @Router /accounts/{id} [get]
+// GetUser godoc
+// @Summary Retrieves user based on given ID
+// @Produce json
+// @Param id path integer true "User ID"
+// @Success 200 {object} models.User
+// @Router /users/{id} [get]
 func (uc *UserController) LoginController(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
@@ -51,6 +44,7 @@ func (uc *UserController) LoginController(w http.ResponseWriter, r *http.Request
 	jwt, serviceError := userService.Login(user)
 
 	if serviceError != nil {
+		logger.Warning(serviceError.Error())
 		utils.RespondWithError(w, http.StatusUnauthorized)
 		return
 	}
@@ -101,11 +95,15 @@ func (uc *UserController) RegisterController(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	utils.ResponseJSON(w, http.StatusCreated, nil)
+	utils.Response(w, http.StatusCreated)
 }
 
 func (uc *UserController) ProtectedEndpointTest(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Protected Endpoint")
+
+	m := make(map[string]string)
+	m["result"] = "super secret information"
+
+	utils.ResponseJSON(w, http.StatusOK, m)
 }
 
 func (uc *UserController) GetUserByEmailController(w http.ResponseWriter, r *http.Request) {
@@ -115,8 +113,7 @@ func (uc *UserController) GetUserByEmailController(w http.ResponseWriter, r *htt
 	email, err := r.URL.Query()["email"]
 
 	if !err || len(email[0]) < 1 {
-		logger.Warning("GetUserByEmailController: Could not find URL Param 'email'")
-		w.WriteHeader(http.StatusBadRequest)
+		utils.RespondWithError(w, http.StatusBadRequest)
 		return
 	}
 
