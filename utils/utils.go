@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 var logger = stdlog.GetFromFlags()
@@ -51,7 +52,9 @@ func GenerateToken(user models.User) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": user.Email,
-		"iss":   "course",
+		"iss":   "RPJ_AUTH",
+		"iat":   time.Now().Unix(),
+		"exp":   time.Now().Add(time.Minute * time.Duration(1)).Unix(),
 	})
 
 	tokenString, err := token.SignedString([]byte(secret))
@@ -61,6 +64,8 @@ func GenerateToken(user models.User) (string, error) {
 		log.Fatal(err)
 	}
 
+	logger.Debug(fmt.Sprintf("Token Service: Issued Token: %s at %s", token.Raw, time.Now()))
+
 	return tokenString, nil
 }
 
@@ -68,20 +73,22 @@ func TokenVerifyMiddleWare(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		bearerToken := strings.Split(authHeader, " ")
-		secret := os.Getenv("JWT_TOKEN")
+		secret := os.Getenv("JWT_KEY")
 
 		if len(bearerToken) == 2 {
 			authToken := bearerToken[1]
 
 			token, err := jwt.Parse(authToken, func(token *jwt.Token) (interface{}, error) {
 				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-					logger.Error("Error Verifying JWT Algorithm")
+					logger.Error("Token Service: Error Verifying JWT Algorithm")
 					return nil, fmt.Errorf("internal Server Error")
 				}
 				return []byte(secret), nil
 			})
 			if err != nil {
-				RespondWithError(w, http.StatusUnauthorized)
+				errorMessage := err.Error()
+				logger.Info("Token Service: ", errorMessage)
+				RespondWithErrorWithMessage(w, http.StatusUnauthorized, errorMessage)
 				return
 			}
 			if token.Valid {
