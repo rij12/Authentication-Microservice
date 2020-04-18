@@ -55,9 +55,6 @@ func (uc *UserController) LoginController(w http.ResponseWriter, r *http.Request
 
 func (uc *UserController) RegisterController(w http.ResponseWriter, r *http.Request) {
 
-	//TODO
-	// Check if user already is in database
-
 	// Parse body into a User
 	decoder := json.NewDecoder(r.Body)
 	var user models.User
@@ -90,8 +87,8 @@ func (uc *UserController) RegisterController(w http.ResponseWriter, r *http.Requ
 	// User Service
 	userService := service.UserService{}
 	_, userServiceError := userService.RegisterUser(user)
-	if userServiceError != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+	if userServiceError.Message != "" {
+		w.WriteHeader(userServiceError.StatusCode)
 		return
 	}
 

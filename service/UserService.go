@@ -18,17 +18,17 @@ type UserService struct {
 	DatabaseService *mongo.Client
 }
 
-func (userService UserService) RegisterUser(user models.User) (models.User, error) {
+func (userService UserService) RegisterUser(user models.User) (models.User, models.Error) {
 
 	userRepo := new(repository.UserRepository)
 	user, err := userRepo.SaveUser(user)
 
-	if err != nil {
+	if err.Message != "" {
 		logger.Warning("UserService: Could not register user: %s", user)
 		return models.User{}, err
 	}
 
-	return user, nil
+	return user, models.Error{}
 }
 
 func (userService UserService) GetUserByEmail(email string) (models.UserResult, error) {
@@ -72,5 +72,4 @@ func (userService UserService) Login(user models.User) (models.JWT, error) {
 	jwt := models.JWT{Token: token}
 
 	return jwt, nil
-
 }
