@@ -29,20 +29,20 @@ func (dbs *Database) ConnectDB(username string, password string, url string, por
 	client, err := mongo.NewClient(options.Client().ApplyURI(dbs.connectionString))
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed to create Database Client with error: ", err)
 	}
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	err = client.Connect(ctx)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed to connect Database Client with error: ", err)
 	}
 
 	err = client.Ping(ctx, readpref.Primary())
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed to ping Database Client with error: ", err)
 	}
 
 	db = client

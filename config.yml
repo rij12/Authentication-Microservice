@@ -1,0 +1,17 @@
+# Server configurations
+server:
+  host: "localhost"
+  port: "8000"
+
+# Database credentials
+# Database Username and Password
+# Set env var: MONGO_USERNAME
+# Set env var: MONGO_PASSWORD
+database:
+  host: "localhost"
+  port: 27017
+
+# JWT Secret
+#  Set env var: JWT_SECRET
+#crypto:
+

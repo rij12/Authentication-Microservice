@@ -48,7 +48,10 @@ func ValidateUser(user models.User) error {
 func GenerateToken(user models.User) (string, error) {
 
 	var err error
-	secret := os.Getenv("JWT_KEY")
+	//configurationService := service.ConfigurationService{}
+	//config := configurationService.GetConfig()
+	//secret := config.Crypto.JWTSecret
+	secret := os.Getenv("JWT_SECRET")
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"email": user.Email,
@@ -73,7 +76,7 @@ func TokenVerifyMiddleWare(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		bearerToken := strings.Split(authHeader, " ")
-		secret := os.Getenv("JWT_KEY")
+		secret := os.Getenv("JWT_SECRET")
 
 		if len(bearerToken) == 2 {
 			authToken := bearerToken[1]
