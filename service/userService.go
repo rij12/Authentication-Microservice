@@ -6,7 +6,6 @@ import (
 	"github.com/alexcesaro/log/stdlog"
 	"github.com/rij12/Authentication-Microservice/models"
 	"github.com/rij12/Authentication-Microservice/repository"
-	"github.com/rij12/Authentication-Microservice/utils"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 	"log"
@@ -62,7 +61,9 @@ func (userService UserService) Login(user models.User) (models.JWT, error) {
 	}
 
 	// Generate JWT Token
-	token, err := utils.GenerateToken(user)
+	config := ConfigurationService{}
+	cryptoService := CryptoService{config.GetConfig()}
+	token, err := cryptoService.GenerateToken(user)
 
 	if err != nil {
 		logger.Critical("UserService: Can not generate JWT Token")

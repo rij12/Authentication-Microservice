@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type User struct {
 	UserID   string `bson:"userId"   json:"userId"`
 	Email    string `bson:"email"    json:"email"`
@@ -22,8 +24,9 @@ type Error struct {
 
 type Config struct {
 	Server struct {
-		Host string `yaml:"host", envconfig:"SERVER_HOST" env-default:"localhost"`
-		Port string `yaml:"port", envconfig:"SERVER_PORT" env-default:"8000"`
+		Host             string        `yaml:"host"`
+		Port             string        `yaml:"port"`
+		TimeoutInSeconds time.Duration `yaml:"timeout"`
 	} `yaml:"server"`
 	Database struct {
 		Username string `envconfig:"MONGO_USERNAME"`
@@ -32,6 +35,10 @@ type Config struct {
 		Port     int    `yaml:"port", envconfig:"MONGO_PORT" env-default:"27017"`
 	} `yaml:"database"`
 	Crypto struct {
-		JWTSecret string `envconfig:"JWT_SECRET"`
-	}
+		JWTSecret string        `envconfig:"JWT_SECRET"`
+		JWTIssuer string        `yaml:"issuer"`
+		JWTExpire time.Duration `yaml:"tokenExpire"`
+		SSLCert   string        `yaml:"SSLCert"`
+		SSLKey    string        `yaml:"SSLKey"`
+	} `yaml:"crypto"`
 }

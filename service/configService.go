@@ -34,10 +34,11 @@ func (config *ConfigurationService) getFromFile(filename string, cfg *models.Con
 }
 
 func (config *ConfigurationService) GetConfig() models.Config {
-	//if cfg == nil {
-	cfg = new(models.Config)
-	config.getFromFile("config.yml", cfg)
-	config.getEnv(cfg)
-	//}
+	if cfg == nil {
+		cfg = new(models.Config)
+		// TODO Pass in config YML as a flag
+		config.getFromFile("config.yml", cfg)
+		config.getEnv(cfg)
+	}
 	return *cfg
 }

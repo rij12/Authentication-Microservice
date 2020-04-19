@@ -2,6 +2,7 @@
 server:
   host: "localhost"
   port: "8000"
+  timeout: 15 # secs
 
 # Database credentials
 # Database Username and Password
@@ -13,5 +14,11 @@ database:
 
 # JWT Secret
 #  Set env var: JWT_SECRET
-#crypto:
+crypto:
+  issuer: "RPJ Auth Service"
+  tokenExpire: 15 # mins
+  SSLCert: "./crypto/cert.pem"
+  SSLKey: "./crypto/key.pem"
+
+
 

@@ -29,8 +29,6 @@ However, for production I would use Let's encrypt certs and store them in a secu
 
 ## TODO
 
-* SSL 
+* Fix SSL 
 * Tests...
-* Refactor hard coded values into a config file. 
-* Refactor Gobal Vars into a Singleton Config Service. 
 
