@@ -20,10 +20,12 @@ type UserService struct {
 
 func (userService UserService) RegisterUser(user models.User) (models.User, error) {
 
+	logger.Info(fmt.Sprintf("UserService:RegisterUser: Attempting to register user with email: %s", user.Email))
+
 	user, err := userService.UserRepository.SaveUser(user)
 
 	if err != nil {
-		logger.Warning("UserService: Could not register user: %s", user)
+		logger.Error(fmt.Sprintf("UserService:RegisterUser: %s", err.Error()))
 		return models.User{}, err
 	}
 
@@ -32,10 +34,12 @@ func (userService UserService) RegisterUser(user models.User) (models.User, erro
 
 func (userService UserService) GetUserByEmail(email string) (models.UserResult, error) {
 
+	logger.Info(fmt.Sprintf("UserService:GetUserByEmail: Attempting to get user with email: %s", email))
+
 	user, err := userService.UserRepository.GetUserByEmail(email)
 
 	if err != nil {
-		logger.Warning("UserService: Could not get user with email: %s", email)
+		logger.Error(fmt.Sprintf("UserService: Could not get user with email: %s", email))
 		return models.UserResult{}, errors.New(fmt.Sprintf("Can not find user with email: %s", email))
 	}
 	stripedUser := models.UserResult{Email: user.Email, UserID: user.UserID}
@@ -44,17 +48,19 @@ func (userService UserService) GetUserByEmail(email string) (models.UserResult, 
 
 func (userService UserService) Login(user models.User) (models.JWT, error) {
 
+	logger.Info("UserService:Login: Attempting to login user with ID:", user.UserID)
+
 	userFromDatabase, err := userService.UserRepository.GetUserByEmail(user.Email)
 
 	if err != nil {
-		logger.Warning("UserService: Could not get user %s from database", user)
+		logger.Error(fmt.Sprintf("UserService:Login: Could not get user %s from database", user))
 		return models.JWT{}, err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(userFromDatabase.Password), []byte(user.Password))
 
 	if err != nil {
-		logger.Warning("UserService: Passwords do not match")
+		logger.Error("UserService:Login: Passwords do not match")
 		return models.JWT{}, err
 	}
 
@@ -62,7 +68,7 @@ func (userService UserService) Login(user models.User) (models.JWT, error) {
 	token, err := userService.CryptoService.GenerateToken(user)
 
 	if err != nil {
-		logger.Critical("UserService: Can not generate JWT Token")
+		logger.Error("UserService:Login: Can not generate JWT Token")
 		log.Fatal(err)
 	}
 

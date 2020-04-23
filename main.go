@@ -26,7 +26,8 @@ func main() {
 	// Repo
 	mongoRepository := repository.MongoRepository{}
 	mongoRepository.Init(config.Database.Username, config.Database.Password, config.Database.Host, config.Database.Port)
-	//defer mongoRepository.GetDb().Disconnect(context.Background())
+	defer mongoRepository.CloseConnection()
+
 	userRepository := repository.UserRepositoryImpl{MongoRepository: &mongoRepository}
 
 	// Services

@@ -41,6 +41,7 @@ func (u UserRepositoryImpl) GetUserByEmail(email string) (models.User, error) {
 	repo, err := u.MongoRepository.GetDb()
 
 	if err != nil {
+		logger.Error("UserRepositoryImpl:GetUserByEmail:",err.Error())
 		return models.User{}, errors.New(err.Error())
 	}
 
@@ -48,7 +49,7 @@ func (u UserRepositoryImpl) GetUserByEmail(email string) (models.User, error) {
 	err = repo.Database("user").Collection("users").FindOne(context.Background(), bson.M{"email": email}).Decode(&userResult)
 
 	if err != nil {
-		logger.Error("UserRepositoryImpl:GetUserByEmail: %s", err.Error())
+		logger.Error("UserRepositoryImpl:GetUserByEmail: ", err.Error())
 		return models.User{}, err
 	}
 	return userResult, nil
@@ -59,7 +60,7 @@ func (u UserRepositoryImpl) GetUser(user models.User) (models.User, error) {
 	repo, err := u.MongoRepository.GetDb()
 
 	if err != nil {
-		logger.Error("UserRepositoryImpl:GetUser: %s", err.Error())
+		logger.Error("UserRepositoryImpl:GetUser: ", err.Error())
 		return models.User{}, errors.New(err.Error())
 	}
 
@@ -67,7 +68,7 @@ func (u UserRepositoryImpl) GetUser(user models.User) (models.User, error) {
 	err = repo.Database("user").Collection("users").FindOne(context.Background(), user).Decode(&userResult)
 
 	if err != nil {
-		logger.Error("UserRepositoryImpl:GetUser: %s", err.Error())
+		logger.Error("UserRepositoryImpl:GetUser: ", err.Error())
 		return models.User{}, err
 	}
 	return userResult, nil

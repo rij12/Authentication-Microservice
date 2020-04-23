@@ -89,3 +89,11 @@ func (dbs *MongoRepository) GetDb() (*mongo.Client, error) {
 	}
 	return dbs.mongoClient, nil
 }
+
+func (dbs *MongoRepository) CloseConnection() error {
+	if dbs.mongoClient == nil {
+		return errors.New("could not close mongo connection")
+	}
+	dbs.mongoClient.Disconnect(context.Background())
+	return nil
+}
