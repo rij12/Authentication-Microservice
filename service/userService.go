@@ -6,7 +6,6 @@ import (
 	"github.com/alexcesaro/log/stdlog"
 	"github.com/rij12/Authentication-Microservice/models"
 	"github.com/rij12/Authentication-Microservice/repository"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 	"log"
 )
@@ -14,26 +13,26 @@ import (
 var logger = stdlog.GetFromFlags()
 
 type UserService struct {
-	DatabaseService *mongo.Client
+	ConfigurationService ConfigurationService
+	CryptoService CryptoService
+	UserRepository repository.UserRepository
 }
 
-func (userService UserService) RegisterUser(user models.User) (models.User, models.Error) {
+func (userService UserService) RegisterUser(user models.User) (models.User, error) {
 
-	userRepo := new(repository.UserRepository)
-	user, err := userRepo.SaveUser(user)
+	user, err := userService.UserRepository.SaveUser(user)
 
-	if err.Message != "" {
+	if err != nil {
 		logger.Warning("UserService: Could not register user: %s", user)
 		return models.User{}, err
 	}
 
-	return user, models.Error{}
+	return user, nil
 }
 
 func (userService UserService) GetUserByEmail(email string) (models.UserResult, error) {
 
-	userRepo := repository.UserRepository{}
-	user, err := userRepo.GetUserByEmail(email)
+	user, err := userService.UserRepository.GetUserByEmail(email)
 
 	if err != nil {
 		logger.Warning("UserService: Could not get user with email: %s", email)
@@ -45,8 +44,7 @@ func (userService UserService) GetUserByEmail(email string) (models.UserResult, 
 
 func (userService UserService) Login(user models.User) (models.JWT, error) {
 
-	userRepo := repository.UserRepository{}
-	userFromDatabase, err := userRepo.GetUserByEmail(user.Email)
+	userFromDatabase, err := userService.UserRepository.GetUserByEmail(user.Email)
 
 	if err != nil {
 		logger.Warning("UserService: Could not get user %s from database", user)
@@ -61,9 +59,7 @@ func (userService UserService) Login(user models.User) (models.JWT, error) {
 	}
 
 	// Generate JWT Token
-	config := ConfigurationService{}
-	cryptoService := CryptoService{config.GetConfig()}
-	token, err := cryptoService.GenerateToken(user)
+	token, err := userService.CryptoService.GenerateToken(user)
 
 	if err != nil {
 		logger.Critical("UserService: Can not generate JWT Token")
@@ -74,3 +70,4 @@ func (userService UserService) Login(user models.User) (models.JWT, error) {
 
 	return jwt, nil
 }
+

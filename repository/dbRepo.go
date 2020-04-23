@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -12,55 +13,52 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-var db *mongo.Client
+//var db *mongo.Client
 
-type Database struct {
-	connectionString string
+type MongoRepository struct {
+	mongoClient *mongo.Client
 }
 
-func (dbs *Database) init() *Database {
-	return &Database{}
+func (dbs *MongoRepository) Init(username string, password string, url string, port int) *MongoRepository {
+	dbs.mongoClient = dbs.ConnectDB(username, password, url, port)
+	return dbs
 }
 
-func (dbs *Database) ConnectDB(username string, password string, url string, port int) *mongo.Client {
+func (dbs *MongoRepository) ConnectDB(username string, password string, url string, port int) *mongo.Client {
 
-	dbs.connectionString = fmt.Sprintf("mongodb://%s:%s@%s:%d/?authSource=admin", username, password, url, port)
+	connectionString := fmt.Sprintf("mongodb://%s:%s@%s:%d/?authSource=admin", username, password, url, port)
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(dbs.connectionString))
+	client, err := mongo.NewClient(options.Client().ApplyURI(connectionString))
 
 	if err != nil {
-		log.Fatal("Failed to create Database Client with error: ", err)
+		log.Fatal("Failed to create MongoRepository Client with error: ", err)
 	}
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	err = client.Connect(ctx)
 
 	if err != nil {
-		log.Fatal("Failed to connect Database Client with error: ", err)
+		log.Fatal("Failed to connect MongoRepository Client with error: ", err)
 	}
 
 	err = client.Ping(ctx, readpref.Primary())
 
 	if err != nil {
-		log.Fatal("Failed to ping Database Client with error: ", err)
+		log.Fatal("Failed to ping MongoRepository Client with error: ", err)
 	}
-
-	db = client
-
 	return client
-
 }
 
-func (dbs *Database) PingDb() error {
+func (dbs *MongoRepository) PingDb() error {
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err := db.Connect(ctx)
+	err := dbs.mongoClient.Connect(ctx)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = db.Ping(ctx, readpref.Primary())
+	err = dbs.mongoClient.Ping(ctx, readpref.Primary())
 
 	if err != nil {
 		log.Fatal(err)
@@ -69,15 +67,15 @@ func (dbs *Database) PingDb() error {
 	return err
 }
 
-func (dbs *Database) ListDatabases() []string {
+func (dbs *MongoRepository) ListDatabases() []string {
 
-	if db == nil {
-		log.Fatal("Database Client is null")
+	if dbs.mongoClient == nil {
+		log.Fatal("MongoRepository Client is null")
 		return []string{}
 	}
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	databases, _ := db.ListDatabaseNames(ctx, bson.M{})
+	databases, _ := dbs.mongoClient.ListDatabaseNames(ctx, bson.M{})
 
 	fmt.Println(databases)
 
@@ -85,6 +83,9 @@ func (dbs *Database) ListDatabases() []string {
 
 }
 
-func (dbs *Database) getDb() *mongo.Client {
-	return db
+func (dbs *MongoRepository) GetDb() (*mongo.Client, error) {
+	if dbs.mongoClient == nil {
+		return &mongo.Client{}, errors.New("mongo Client nil")
+	}
+	return dbs.mongoClient, nil
 }

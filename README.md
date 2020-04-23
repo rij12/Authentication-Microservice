@@ -30,5 +30,6 @@ However, for production I would use Let's encrypt certs and store them in a secu
 ## TODO
 
 * Fix SSL 
+* User Dependency Inject Framework. Look at wire or Uber's Go library.
 * Tests...
 

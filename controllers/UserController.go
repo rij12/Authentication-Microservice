@@ -10,23 +10,16 @@ import (
 	"github.com/google/uuid"
 	"github.com/rij12/Authentication-Microservice/models"
 	"github.com/rij12/Authentication-Microservice/service"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
 
 var logger = stdlog.GetFromFlags()
 
 type UserController struct {
-	DatabaseClient *mongo.Client
 	UserService    *service.UserService
 }
 
-// GetUser godoc
-// @Summary Retrieves user based on given ID
-// @Produce json
-// @Param id path integer true "User ID"
-// @Success 200 {object} models.User
-// @Router /users/{id} [get]
+
 func (uc *UserController) LoginController(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
@@ -40,8 +33,7 @@ func (uc *UserController) LoginController(w http.ResponseWriter, r *http.Request
 	}
 
 	// User Service
-	userService := service.UserService{}
-	jwt, serviceError := userService.Login(user)
+	jwt, serviceError := uc.UserService.Login(user)
 
 	if serviceError != nil {
 		logger.Warning(serviceError.Error())
@@ -85,10 +77,9 @@ func (uc *UserController) RegisterController(w http.ResponseWriter, r *http.Requ
 	}
 
 	// User Service
-	userService := service.UserService{}
-	_, userServiceError := userService.RegisterUser(user)
-	if userServiceError.Message != "" {
-		w.WriteHeader(userServiceError.StatusCode)
+	_, userServiceError := uc.UserService.RegisterUser(user)
+	if userServiceError != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -114,11 +105,10 @@ func (uc *UserController) GetUserByEmailController(w http.ResponseWriter, r *htt
 		return
 	}
 
-	userService := service.UserService{}
-	user, userServiceError := userService.GetUserByEmail(email[0])
+	user, userServiceError := uc.UserService.GetUserByEmail(email[0])
 
 	if userServiceError != nil {
-		utils.RespondWithErrorWithMessage(w, http.StatusNotFound, userServiceError.Error())
+		utils.RespondWithError(w, http.StatusNotFound)
 		return
 	}
 

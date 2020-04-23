@@ -64,7 +64,7 @@ func (cryptoService *CryptoService) TokenVerifyMiddleWare(next http.HandlerFunc)
 			if err != nil {
 				errorMessage := err.Error()
 				logger.Info("Token Service: ", errorMessage)
-				utils.RespondWithErrorWithMessage(w, http.StatusUnauthorized, errorMessage)
+				utils.RespondWithError(w, http.StatusUnauthorized)
 				return
 			}
 			if token.Valid {

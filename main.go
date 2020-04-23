@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"github.com/alexcesaro/log/stdlog"
 	"github.com/gorilla/mux"
@@ -17,21 +16,29 @@ var logger = stdlog.GetFromFlags()
 
 func main() {
 
-	db := repository.Database{}
+	// Dependency Injection
+	// See README for more details about DI.
 
-	// Services
+	// Config
 	configurationService := service.ConfigurationService{}
 	config := configurationService.GetConfig()
+
+	// Repo
+	mongoRepository := repository.MongoRepository{}
+	mongoRepository.Init(config.Database.Username, config.Database.Password, config.Database.Host, config.Database.Port)
+	//defer mongoRepository.GetDb().Disconnect(context.Background())
+	userRepository := repository.UserRepositoryImpl{MongoRepository: &mongoRepository}
+
+	// Services
 	cryptoService := service.CryptoService{}
 	cryptoService.Init(config)
+	userService := service.UserService{ConfigurationService: configurationService,
+									   CryptoService: cryptoService,
+									   UserRepository: userRepository}
 
-	// DB
-	connection := db.ConnectDB(config.Database.Username, config.Database.Password, config.Database.Host, config.Database.Port)
-	defer connection.Disconnect(context.Background())
-
-	// Routing
+	// Routing and Controllers
 	router := mux.NewRouter()
-	controller := controllers.UserController{}
+	controller := controllers.UserController{UserService: &userService}
 
 	registerHandlers(router, &controller, cryptoService)
 

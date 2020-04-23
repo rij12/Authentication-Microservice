@@ -31,7 +31,6 @@ func Response(w http.ResponseWriter, status int) {
 
 // Checks if a user is valid
 func ValidateUser(user models.User) error {
-
 	if user.Password == "" || user.Email == "" {
 		return errors.New("username or Password is empty")
 	}
